@@ -55,9 +55,6 @@ class Quiz(models.Model):
             elif len(correct_answer) > 1:
                 is_multiple = True
             
-            # create the question object
-            # question = Question.objects.get_or_create(quiz=self, text=question_text)
-
             # create questions object with multiple choice
             question, _ = Question.objects.get_or_create(
                 quiz=self, text=question_text,
@@ -66,12 +63,6 @@ class Quiz(models.Model):
             question.is_multiple = is_multiple
             question.save()
 
-            # create choices object
-            # choice_1 = Choice.objects.get_or_create(question=question[0], text=choice1, is_correct=correct_answer == 'A')
-            # choice_2 = Choice.objects.get_or_create(question=question[0], text=choice2, is_correct=correct_answer == 'B')
-            # choice_3 = Choice.objects.get_or_create(question=question[0], text=choice3, is_correct=correct_answer == 'C')
-            # choice_4 = Choice.objects.get_or_create(question=question[0], text=choice4, is_correct=correct_answer == 'D')
-            
             # create choices object with multiple correct answers
             choice_1 = Choice.objects.get_or_create(question=question, text=choice1, is_correct='A' in correct_answer)
             choice_2 = Choice.objects.get_or_create(question=question, text=choice2, is_correct='B' in correct_answer)
