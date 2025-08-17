@@ -19,6 +19,16 @@
         .questions {
             user-select: none;
         }
+        .form-check-input:checked {
+            background-color: #28a745 !important; /* Màu nền xanh lá */
+            border-color: #28a745 !important;     /* Viền xanh lá */
+        }
+        .form-check-input:checked[type="radio"] {
+            box-shadow: 0 0 0 0.2rem rgba(40,167,69,.25);
+        }
+        .form-check-input:checked[type="checkbox"] {
+            box-shadow: 0 0 0 0.2rem rgba(40,167,69,.25);
+        }
     </style>
     
     <div class="container my-5">
@@ -57,10 +67,15 @@
                     {% for option in question.choice_set.all %}
                     <div class="form-check">
                         <label class="form-check-label" for="{{option.id}}">
-                            <input class="form-check-input" disabled {% if option.is_correct %}checked{% endif %} value="{{option.text}}" type="radio" name="{{option.question.id}}" id="{{option.id}}">
+                            <input class="form-check-input"
+                                disabled
+                                {% if option.is_correct %}checked{% endif %}
+                                value="{{option.text}}"
+                                type="{% if question.is_multiple %}checkbox{% else %}radio{% endif %}"
+                                name="{{option.question.id}}{% if question.is_multiple %}[]{% endif %}"
+                                id="{{option.id}}">
                             {{option.text}}
                         </label>
-                        {% comment %} is_correct is models.py {% endcomment %}
                         {% if option.is_correct %}
                         <span class="visually-hidden correct-answer">{{option.text}}</span>
                         {% endif %}

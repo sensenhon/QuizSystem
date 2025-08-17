@@ -20,6 +20,7 @@ class Quiz(models.Model):
     description = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     quiz_file = models.FileField(upload_to='quiz/')    
+    duration_minutes = models.PositiveIntegerField(default=10)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -48,19 +49,40 @@ class Quiz(models.Model):
             choice3 = row['C']
             choice4 = row['D']
             correct_answer = row['Answer']
+            is_multiple = False
+            if 'is_multiple' in row and (row['is_multiple'] == True or str(row['is_multiple']).lower() in ['1', 'true', 'yes']):
+                is_multiple = True
+            elif len(correct_answer) > 1:
+                is_multiple = True
             
             # create the question object
-            question = Question.objects.get_or_create(quiz=self, text=question_text)
-            
+            # question = Question.objects.get_or_create(quiz=self, text=question_text)
+
+            # create questions object with multiple choice
+            question, _ = Question.objects.get_or_create(
+                quiz=self, text=question_text,
+                defaults={'is_multiple': is_multiple}
+            )
+            question.is_multiple = is_multiple
+            question.save()
+
             # create choices object
-            choice_1 = Choice.objects.get_or_create(question=question[0], text=choice1, is_correct=correct_answer == 'A')
-            choice_2 = Choice.objects.get_or_create(question=question[0], text=choice2, is_correct=correct_answer == 'B')
-            choice_3 = Choice.objects.get_or_create(question=question[0], text=choice3, is_correct=correct_answer == 'C')
-            choice_4 = Choice.objects.get_or_create(question=question[0], text=choice4, is_correct=correct_answer == 'D')
-    
+            # choice_1 = Choice.objects.get_or_create(question=question[0], text=choice1, is_correct=correct_answer == 'A')
+            # choice_2 = Choice.objects.get_or_create(question=question[0], text=choice2, is_correct=correct_answer == 'B')
+            # choice_3 = Choice.objects.get_or_create(question=question[0], text=choice3, is_correct=correct_answer == 'C')
+            # choice_4 = Choice.objects.get_or_create(question=question[0], text=choice4, is_correct=correct_answer == 'D')
+            
+            # create choices object with multiple correct answers
+            choice_1 = Choice.objects.get_or_create(question=question, text=choice1, is_correct='A' in correct_answer)
+            choice_2 = Choice.objects.get_or_create(question=question, text=choice2, is_correct='B' in correct_answer)
+            choice_3 = Choice.objects.get_or_create(question=question, text=choice3, is_correct='C' in correct_answer)
+            choice_4 = Choice.objects.get_or_create(question=question, text=choice4, is_correct='D' in correct_answer)
+
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     text = models.TextField()
+    # Is this question multiple choice?
+    is_multiple = models.BooleanField(default=False)
     
     def __str__(self):
         return self.text[:50]
