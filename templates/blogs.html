@@ -1,0 +1,26 @@
+{% extends 'index.html' %}
+{% block title %}Blogs{% endblock title %}
+
+{% block content %}
+
+    <h1 class="display-4 text-center my-5">Blogs</h1>
+
+    <main>
+        <div class="container col-md-6 col-sm-12">
+            {% for year_count in year_blog_count %}
+            <ul class="list mb-4 p-3">
+                <h3>{{year_count.year}} - {{year_count.count}} blog(s)</h3>
+                {% for blog in blogs %}
+                {% if blog.created_at|date:"Y" == year_count.year|stringformat:"s" %}
+                <li class="d-flex justify-content-between mb-2">
+                    <a href="{% url 'blog' blog.id %}">{{blog.title}}</a>
+                    <span title="26 Jul 23 08:05 UTC" class="text-secondary">{{blog.created_at}}</span>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+            {% endfor %}
+        </div>
+    </main>
+
+{% endblock content %}
