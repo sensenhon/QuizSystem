@@ -4,26 +4,130 @@
 
 {% block content %}
 
-<div class="container text-center">
-    <h1 class="display-4 text-center">Leaderboard</h1>
+<style>
+    .leaderboard-avatar {
+        width: 100px !important;
+        height: 100px !important;
+        object-fit: cover;
+        border-radius: 50%;
+        display: block;
+    }
+    .leaderboard-avatar.top1 {
+        width: 130px !important;
+        height: 130px !important;
+    }
+    .leaderboard-avatar.othertop {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    .bg-bronze {
+        background-color: #cd7f32 !important; /* Bronze color */
+        color: #fff !important;
+    }
+    .bg-silver {
+        background-color: #bec2cb !important; /* Silver color */
+        color: #fff !important;
+    }
+    .bg-lightblue {
+        background-color: #add8e6 !important; /* Lightblue color */
+        color: #fff !important;
+    }
+    .other-user-card {
+        max-width: 450px;
+        margin-left: auto;
+        margin-right: auto;
+        min-height: 70px;
+    }
+    .btn-view-profile {
+        border: none !important;
+        box-shadow: none !important;
+        font-size: 0.80rem;
+        padding: 2px 10px;
+        line-height: 2.0;
+        background-color: #e1e3e0ff !important;
+        color: #000 !important;
+    }
+    .btn-view-profile.top1 {
+        background-color: #F8ECD9 !important;
+        color: #000 !important;
+    }
+    .btn-view-profile.top2 {
+        background-color: #e1e3e0ff !important;
+        color: #000 !important;
+    }
+    .btn-view-profile.top3 {
+        background-color: #f7ede2ff !important;
+        color: #000 !important;
+    }
+    .badge-other-top {
+        font-size: 1.2rem;
+        padding: 0.4em 1.0em;
+    }
+</style>
 
-    <div class="row my-5 row-cols-sm-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 mx-3">
-        {% if leaderboard_users|length == 0 %}
-        <div class="col-lg-4 position-relative mb-4">
-            <h4 class="text-center text-danger">No User Available on Leaderboard</h4>
+<div class="container text-center">
+    <h1 class="display-4 text-center my-5">Leaderboard</h1>
+
+    {% if leaderboard_users|length == 0 %}
+        <h4 class="text-center text-danger">No User Available on Leaderboard</h4>
+    {% else %}
+        <div class="row justify-content-center align-items-end my-5">
+            {% with top_users=leaderboard_users|slice:":3" %}
+                {% if top_users|length == 3 %}
+                    <!-- TOP2 -->
+                    <div class="col-4 d-flex flex-column align-items-center">
+                        <span class="badge bg-silver mb-2">TOP 2</span>
+                        <img src="{{top_users.1.user.profile.profile_img.url}}" class="leaderboard-avatar" alt="user-profile">
+                        <h5>@{{top_users.1.user.username}}</h5>
+                        <span class="fw-bold text-success">{{top_users.1.total_score}} points</span>
+                        <a href="{% url 'profile' top_users.1.user.username %}" class="btn btn-outline-primary btn-sm btn-view-profile top2 mt-2">View Profile</a>
+                    </div>
+                    <!-- TOP1 -->
+                    <div class="col-4 d-flex flex-column align-items-center">
+                        <span class="badge bg-warning text-dark mb-2">TOP 1</span>
+                        <img src="{{top_users.0.user.profile.profile_img.url}}" class="leaderboard-avatar top1" alt="user-profile">
+                        <h4 class="fw-bold">@{{top_users.0.user.username}}</h4>
+                        <span class="fw-bold text-success">{{top_users.0.total_score}} points</span>
+                        <a href="{% url 'profile' top_users.0.user.username %}" class="btn btn-outline-primary btn-sm btn-view-profile top1 mt-2">View Profile</a>
+                    </div>
+                    <!-- TOP3 -->
+                    <div class="col-4 d-flex flex-column align-items-center">
+                        <span class="badge bg-bronze mb-2">TOP 3</span>
+                        <img src="{{top_users.2.user.profile.profile_img.url}}" class="leaderboard-avatar" alt="user-profile">
+                        <h5>@{{top_users.2.user.username}}</h5>
+                        <span class="fw-bold text-success">{{top_users.2.total_score}} points</span>
+                        <a href="{% url 'profile' top_users.2.user.username %}" class="btn btn-outline-primary btn-sm btn-view-profile top3 mt-2">View Profile</a>
+                    </div>
+                {% else %}
+                    {% for user in top_users %}
+                        <div class="col d-flex flex-column align-items-center">
+                            <span class="badge bg-silver mb-2">TOP {{forloop.counter}}</span>
+                            <img src="{{user.user.profile.profile_img.url}}" class="leaderboard-avatar" alt="user-profile">
+                            <h5>@{{user.user.username}}</h5>
+                            <span class="fw-bold text-success">{{user.total_score}} points</span>
+                            <a href="{% url 'profile' user.user.username %}" class="btn btn-outline-primary btn-sm btn-view-profile mt-2">View Profile</a>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
         </div>
-        {% else %}
-        {% for rank in leaderboard_users %}
-        <div class="col-lg-4 position-relative mb-4">
-            <img src="{{rank.user.profile.profile_img.url}}" class="img-fluid" width="150" height="150" alt="user-profile">
-            <span class="position-absolute top-0 start-90 translate-middle badge rounded-pill bg-success">{{forloop.counter}}</span>
-            <h2 class="fw-normal">@{{rank.user.username}}</h2>
-            <p>{{rank.user.profile.bio|truncatewords:5}}</p>
-            <p><a class="btn btn-secondary" href="{% url 'profile' rank.user.username %}">View Profile</a></p>
+
+        <!-- Other users -->
+        <div class="row my-3 justify-content-center">
+            <div class="col-12 col-md-8">
+                {% for rank in leaderboard_users|slice:"3:" %}
+                    <div class="card other-user-card p-2 d-flex flex-row align-items-center mb-2">
+                        <span class="badge bg-lightblue badge-other-top me-2">{{forloop.counter|add:3}}</span>
+                        <img src="{{rank.user.profile.profile_img.url}}" class="leaderboard-avatar othertop ms-2 me-2" alt="user-profile">
+                        <div class="flex-grow-1 d-flex justify-content-between align-items-center">
+                            <a href="{% url 'profile' rank.user.username %}" class="ms-2">@{{rank.user.username}}</a>
+                            <span class="fw-bold text-success">{{rank.total_score}} points</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
-        {% endfor %}
-        {% endif %}
-    </div>
+    {% endif %}
 </div>
     
 {% endblock content %}
